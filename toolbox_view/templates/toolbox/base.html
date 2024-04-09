@@ -1,0 +1,26 @@
+{% load ajax_helpers modal_tags %}
+<!doctype html>
+
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Django Backup {{ request.site.name }}</title>
+    {% lib_include 'ajax_helpers' 'Bootstrap' 'FontAwesome' module='ajax_helpers.includes' %}
+    {% lib_include 'Modals' module='django_modals.includes' %}
+
+    <style>
+        .header-color {
+            background-color: #00004e;
+            color: #fefefe;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg header-color navbar-dark active-bar">
+        <h4 class="mb-0">Toolbox</h4>
+    </nav>
+    <div class="m-4">
+        {{ tool_box_buttons }}
+    </div>
+</body>
+</html>
