@@ -1,0 +1,26 @@
+
+[build-system]
+requires      = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "django-toolbox-view"
+version = "0.0.1"
+description = "Provides a Django view to run functions from apps"
+readme = "readme.md"
+authors = [{ name = "Ian Jones"}]
+license = { file = "LICENSE" }
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+]
+
+dependencies = ['django-nested-modals', 'django-tab-menus']
+requires-python = ">=3.9"
+
+[project.urls]
+Homepage = "https://github.com/jonesim/django-toolbox-view"
+
+[tool.setuptools]
+packages = ['toolbox_view']

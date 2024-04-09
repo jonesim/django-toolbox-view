@@ -1,0 +1,6 @@
+/dist/
+/build/
+/django_toolbox_view.egg-info/
+/.idea/
+/django_examples/db.sqlite3
+*.pyc
