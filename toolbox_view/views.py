@@ -1,5 +1,6 @@
 import importlib
 
+from ajax_helpers.mixins import AjaxHelpers
 from ajax_helpers.utils import ajax_command
 from django.apps import apps
 from django.utils.safestring import mark_safe
@@ -67,3 +68,7 @@ class Toolbox(AjaxMessagesMixin, TemplateView):
                 menus.append(f'<h4>{g}</h4>{HtmlMenu(template="buttons").add_items(*buttons).render()}')
         context['tool_box_buttons'] = mark_safe('<hr>'.join(menus))
         return context
+
+
+class SimpleToolbox(AjaxHelpers, Toolbox):
+    pass

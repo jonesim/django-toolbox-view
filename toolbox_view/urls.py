@@ -2,7 +2,7 @@ from django.urls import path, include
 from django_modals.task_modals import TaskModal
 
 from toolbox_view.tasks import toolbox_task
-from toolbox_view.views import Toolbox
+from toolbox_view.views import SimpleToolbox
 
 app_name = 'toolbox'
 
@@ -12,5 +12,5 @@ modal_urls = [
 
 urlpatterns = [
     path('modal/', include(modal_urls)),
-    path('toolbox/', Toolbox.as_view(), name='toolbox'),
+    path('toolbox/', SimpleToolbox.as_view(), name='toolbox'),
 ]
