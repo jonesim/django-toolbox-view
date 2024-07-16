@@ -3,6 +3,7 @@ import importlib
 from ajax_helpers.mixins import AjaxHelpers
 from ajax_helpers.utils import ajax_command
 from django.apps import apps
+from django.contrib.auth.mixins import UserPassesTestMixin
 from django.utils.safestring import mark_safe
 from django.views.generic import TemplateView
 from django_menus.menu import MenuItem, HtmlMenu
@@ -12,13 +13,16 @@ from toolbox_view import ToolBoxBase
 from toolbox_view.helpers import import_classes_from_module
 
 
-class Toolbox(AjaxMessagesMixin, TemplateView):
+class Toolbox(UserPassesTestMixin, AjaxMessagesMixin, TemplateView):
     template_name = 'toolbox/base.html'
     menu_display = 'Toolbox'
 
     def __init__(self, *args, **kwargs):
         self._classes = None
         super().__init__(*args, **kwargs)
+
+    def test_func(self):
+        return self.request.user.is_staff
 
     @property
     def function_classes(self):

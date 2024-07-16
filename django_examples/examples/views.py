@@ -11,3 +11,6 @@ class TabToolboxView(AjaxMenuTabs, Toolbox):
 
     def setup_menu(self):
         self.add_menu('main_menu').add_items('subclassed_view',  MenuItem('toolbox:toolbox', 'Simple View'))
+
+    def test_func(self):
+        return True
