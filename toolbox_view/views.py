@@ -41,14 +41,15 @@ class Toolbox(UserPassesTestMixin, AjaxMessagesMixin, TemplateView):
         return MenuItem(ajax_command('ajax_post', data={'button': 'execute', 'module': function_class.__module__,
                                                         'class_name': function_class.__name__}),
                         function_class.button_text,
-                        link_type=MenuItem.AJAX_COMMAND)
+                        link_type=MenuItem.AJAX_COMMAND,
+                        css_classes=f'mr-1 mb-1 btn btn-{function_class().button_colour}')
 
     @staticmethod
     def task_button(function_class):
         return MenuItem(f'toolbox:toolbox_task,'
                         f'module-{function_class.__module__}-'
                         f'class_name-{function_class.__name__}',
-                        function_class.button_text, css_classes=f'mr-1 mb-1 btn btn-{function_class.button_colour}')
+                        function_class.button_text, css_classes=f'mr-1 mb-1 btn btn-{function_class().button_colour}')
 
     def button_execute(self, class_name, module):
         function_class = getattr(importlib.import_module(f'{module}'), class_name)()

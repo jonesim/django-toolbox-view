@@ -5,8 +5,11 @@ from toolbox_view.helpers import task_print
 
 class ToolBoxBase(AjaxHelpers):
     button_text = None
-    button_colour = 'success'
     task = False
+
+    @property
+    def button_colour(self):
+        return 'success' if self.task else 'primary'
 
     def button_function(self):
         pass
