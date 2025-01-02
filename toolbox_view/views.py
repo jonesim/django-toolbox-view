@@ -51,10 +51,10 @@ class Toolbox(UserPassesTestMixin, AjaxMessagesMixin, TemplateView):
                         f'class_name-{function_class.__name__}',
                         function_class.button_text, css_classes=f'mr-1 mb-1 btn btn-{function_class().button_colour}')
 
-    def button_execute(self, class_name, module):
+    def button_execute(self, class_name, module, **kwargs):
         function_class = getattr(importlib.import_module(f'{module}'), class_name)()
         function_class.request = self.request
-        return function_class.button_function()
+        return function_class.button_function(**kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
