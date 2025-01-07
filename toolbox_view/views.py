@@ -10,7 +10,7 @@ from django_menus.menu import MenuItem, HtmlMenu
 from django_modals.messages import AjaxMessagesMixin
 
 from toolbox_view import ToolBoxBase
-from toolbox_view.helpers import import_classes_from_module
+from toolbox_view.helpers import import_classes_from_module, task_url, has_confirm
 
 
 class Toolbox(UserPassesTestMixin, AjaxMessagesMixin, TemplateView):
@@ -44,15 +44,10 @@ class Toolbox(UserPassesTestMixin, AjaxMessagesMixin, TemplateView):
                         link_type=MenuItem.AJAX_COMMAND,
                         css_classes=f'mr-1 mb-1 btn btn-{function_class().button_colour}')
 
-    @staticmethod
-    def task_button(function_class):
-        return MenuItem(f'toolbox:toolbox_task,'
-                        f'module-{function_class.__module__}-'
-                        f'class_name-{function_class.__name__}',
-                        function_class.button_text, css_classes=f'mr-1 mb-1 btn btn-{function_class().button_colour}')
-
     def button_execute(self, class_name, module, **kwargs):
         function_class = getattr(importlib.import_module(f'{module}'), class_name)()
+        if getattr(function_class, 'task', False) and not has_confirm(function_class.button_function):
+            return self.command_response('show_modal', modal=task_url(module, class_name))
         function_class.request = self.request
         return function_class.button_function(**kwargs)
 
@@ -68,7 +63,7 @@ class Toolbox(UserPassesTestMixin, AjaxMessagesMixin, TemplateView):
         groups.sort()
         menus = []
         for g in groups:
-            buttons = [self.task_button(v) if v.task else self.direct_button(v) for v in group_dict[g]]
+            buttons = [self.direct_button(v) for v in group_dict[g] if v.button_permission(self.request)]
             if buttons:
                 menus.append(f'<h4>{g}</h4>{HtmlMenu(template="buttons").add_items(*buttons).render()}')
         context['tool_box_buttons'] = mark_safe('<hr>'.join(menus))

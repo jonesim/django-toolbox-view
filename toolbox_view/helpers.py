@@ -1,6 +1,8 @@
 import importlib
 import os
 
+from django.urls import reverse
+
 
 def task_print(task_object, message):
     if task_object:
@@ -26,3 +28,11 @@ def import_classes_from_module(module, module_class=type):
             if isinstance(obj, type) and obj != module_class and issubclass(obj, module_class):
                 classes.append(obj)
     return classes
+
+
+def task_url(module, class_name):
+    return reverse('toolbox:toolbox_task', kwargs={'slug':f'module-{module}-class_name-{class_name}'})
+
+
+def has_confirm(func):
+    return 'ConfirmToolbox' in func.__qualname__
