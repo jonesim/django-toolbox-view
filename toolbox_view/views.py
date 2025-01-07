@@ -42,6 +42,7 @@ class Toolbox(UserPassesTestMixin, AjaxMessagesMixin, TemplateView):
                                                         'class_name': function_class.__name__}),
                         function_class.button_text,
                         link_type=MenuItem.AJAX_COMMAND,
+                        tooltip=getattr(function_class, 'tooltip', None),
                         css_classes=f'mr-1 mb-1 btn btn-{function_class().button_colour}')
 
     def button_execute(self, class_name, module, **kwargs):
