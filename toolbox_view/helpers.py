@@ -87,4 +87,4 @@ def read_task_token(token, request, max_age=None):
 
 
 def has_confirm(func):
-    return 'ConfirmToolbox' in func.__qualname__
+    return getattr(func, 'confirm_toolbox', False)
