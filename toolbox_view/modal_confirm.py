@@ -52,7 +52,8 @@ class ConfirmToolbox(ConfirmAjaxMethod):
                 confirm = kwargs.pop('confirm', None)
                 if getattr(view, 'task', False) and confirm != 'task':
                     return view.command_response('show_modal', modal=task_url(view.__class__.__module__,
-                                                                              view.__class__.__name__))
+                                                                              view.__class__.__name__,
+                                                                              view.request))
                 return _func(view, **kwargs)
             view.request.method = 'GET'
             message = self.proc_message(self.kwargs.get('message', 'Are you sure?'), **kwargs)

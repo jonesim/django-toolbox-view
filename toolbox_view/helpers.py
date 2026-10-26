@@ -1,6 +1,7 @@
 import importlib
 import os
 
+from django.core import signing
 from django.urls import reverse
 
 
@@ -30,8 +31,49 @@ def import_classes_from_module(module, module_class=type):
     return classes
 
 
-def task_url(module, class_name):
-    return reverse('toolbox:toolbox_task', kwargs={'slug':f'module-{module}-class_name-{class_name}'})
+def toolbox_classes():
+    """
+    The ToolBoxBase subclasses found in each installed app's toolbox package, keyed by the app's verbose_name.
+    """
+    from django.apps import apps
+    from toolbox_view.toolbox_base import ToolBoxBase
+
+    classes = {}
+    for a in apps.app_configs.values():
+        try:
+            toolbox = importlib.import_module('.toolbox', a.module.__package__)
+            classes[a.verbose_name] = import_classes_from_module(toolbox, ToolBoxBase)
+        except ModuleNotFoundError:
+            pass
+    return classes
+
+
+TASK_TOKEN_SALT = 'toolbox_view.task'
+
+
+def task_url(module, class_name, request):
+    """
+    The task modal URL for a toolbox function.  Only call it once request has passed the toolbox view's test_func
+    and the function's button_permission: the URL carries a token, signed for request's user, that the modal
+    accepts in place of repeating those checks.
+    """
+    token = signing.TimestampSigner(salt=TASK_TOKEN_SALT).sign_object(
+        {'user': request.user.pk, 'module': module, 'class_name': class_name})
+    return reverse('toolbox:toolbox_task', kwargs={'token': token})
+
+
+def read_task_token(token, request, max_age=None):
+    """
+    The module and class_name from a task_url token, or None if it isn't validly signed for request's user, or
+    is older than max_age seconds.
+    """
+    try:
+        data = signing.TimestampSigner(salt=TASK_TOKEN_SALT).unsign_object(token, max_age=max_age)
+    except signing.BadSignature:
+        return None
+    if data.get('user') != request.user.pk:
+        return None
+    return {'module': data['module'], 'class_name': data['class_name']}
 
 
 def has_confirm(func):
