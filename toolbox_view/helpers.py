@@ -19,15 +19,16 @@ def task_print(task_object, message):
 
 
 def import_classes_from_module(module, module_class=type):
+    if hasattr(module, '__path__'):
+        files = [f for f in os.listdir(module.__path__[0]) if f.endswith('.py') and not f.startswith('__')]
+        modules = [importlib.import_module(f'{module.__name__}.{os.path.splitext(f)[0]}') for f in files]
+    else:
+        modules = [module]
     classes = []
-    module_name = module.__name__
-    module_dir = module.__path__[0]
-    files = [f for f in os.listdir(module_dir) if f.endswith('.py') and not f.startswith('__')]
-    for file_name in files:
-        module_file = os.path.splitext(file_name)[0]
-        module = importlib.import_module(f'{module_name}.{module_file}')
+    for module in modules:
         for name, obj in module.__dict__.items():
-            if isinstance(obj, type) and obj != module_class and issubclass(obj, module_class):
+            if (isinstance(obj, type) and obj != module_class and issubclass(obj, module_class)
+                    and obj not in classes):
                 classes.append(obj)
     return classes
 
@@ -35,6 +36,7 @@ def import_classes_from_module(module, module_class=type):
 def toolbox_classes():
     """
     The ToolBoxBase subclasses found in each installed app's toolbox package, keyed by the app's verbose_name.
+    Classes without button_text (such as shared base classes) are left out.
     """
     from django.apps import apps
     from toolbox_view.toolbox_base import ToolBoxBase
@@ -43,9 +45,12 @@ def toolbox_classes():
     for a in apps.app_configs.values():
         try:
             toolbox = importlib.import_module('.toolbox', a.module.__package__)
-            classes[a.verbose_name] = import_classes_from_module(toolbox, ToolBoxBase)
-        except ModuleNotFoundError:
-            pass
+        except ModuleNotFoundError as e:
+            # Only an app without a toolbox is skipped; a missing import inside a toolbox file is raised
+            if e.name != f'{a.module.__package__}.toolbox':
+                raise
+            continue
+        classes[a.verbose_name] = [c for c in import_classes_from_module(toolbox, ToolBoxBase) if c.button_text]
     return classes
 
 
