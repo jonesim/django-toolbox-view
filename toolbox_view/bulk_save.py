@@ -1,4 +1,5 @@
 import datetime
+import decimal
 
 from django.core.management.color import no_style
 from django.db import connection
@@ -61,13 +62,16 @@ class BulkSaveSQL(BulkSave):
                 v = getattr(r, f)
                 if v is None:
                     field_results.append('NULL')
-                elif isinstance(v, str):
-                    v = v.replace("'", "''")
-                    field_results.append(f"'{v}'")
-                elif isinstance(v, (datetime.date, datetime.datetime)):
-                    field_results.append(f"'{v.strftime('%Y-%m-%d')}'")
-                else:
+                elif isinstance(v, (int, float, decimal.Decimal)):
                     field_results.append(str(v))
+                else:
+                    # datetime before date, as datetime is a subclass of date
+                    if isinstance(v, datetime.datetime):
+                        v = v.isoformat(' ')
+                    elif isinstance(v, datetime.date):
+                        v = v.isoformat()
+                    v = str(v).replace("'", "''")
+                    field_results.append(f"'{v}'")
             values.append('(' + ','.join(field_results) + ')')
         # noinspection SqlDialectInspection,PyProtectedMember
         sql = f'INSERT INTO {self.model._meta.db_table} ({", ".join(self.fields)}) VALUES {",".join(values)}'
@@ -79,6 +83,8 @@ class BulkSaveSQL(BulkSave):
             if self.model_id:
                 for c, returned_id in enumerate(cursor.fetchall()):
                     self.records[c].id = returned_id[0]
+        if self.store_ids:
+            self.ids_added += [r.id for r in self.records]
 
 
 def delete_reset(*models, query_filter=None, raw=False, task_object=None):
