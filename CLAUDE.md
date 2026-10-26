@@ -12,7 +12,7 @@ The package has almost no UI of its own: one page template (`toolbox/base.html`)
 
 Part of a cross-package migration (summary in `X:\CLAUDE.md`). This package has **zero jQuery** of its own and exactly **one** Bootstrap-4-only site:
 
-- `toolbox_view/views.py:46` — `css_classes=f'mr-1 mb-1 btn btn-...'`: `mr-1` → `me-1` for BS5 (`mb-1` is fine in both).
+- `toolbox_view/views.py` `direct_button` — done: buttons carry both `mr-1` (BS4) and `me-1` (BS5); each version ignores the other's class. The demo's `base_template.html` heading does the same (`mr-4 me-4`).
 
 Everything else (modal chrome, button/menu templates, `lib_include` bundles in `base.html`) is upstream in django-nested-modals / django-tab-menus / django-ajax-helpers — when those ship their migrated releases, update the dependency pins in `requirements.txt` (currently pins `django-nested-modals==0.0.25` — `pyproject.toml` needs `>=0.0.24` for `ConfirmAjaxMethod.get_html` — `django-ajax-helpers==0.0.22`, `django-tab-menus==0.0.16`, and a stale `django-crispy-forms==1.12.0` that can be dropped once the new django-nested-modals is pinned).
 
