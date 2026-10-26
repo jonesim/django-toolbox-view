@@ -2,7 +2,8 @@ import importlib
 import os
 
 from django.core import signing
-from django.urls import reverse
+from django.core.exceptions import ImproperlyConfigured
+from django.urls import NoReverseMatch, reverse
 
 
 def task_print(task_object, message):
@@ -59,7 +60,11 @@ def task_url(module, class_name, request):
     """
     token = signing.TimestampSigner(salt=TASK_TOKEN_SALT).sign_object(
         {'user': request.user.pk, 'module': module, 'class_name': class_name})
-    return reverse('toolbox:toolbox_task', kwargs={'token': token})
+    try:
+        return reverse('toolbox:toolbox_task', kwargs={'token': token})
+    except NoReverseMatch:
+        raise ImproperlyConfigured(f'{module}.{class_name} has task = True, which needs Celery installed and '
+                                   f'toolbox_view.urls included (URL name toolbox:toolbox_task)') from None
 
 
 def read_task_token(token, request, max_age=None):
